@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[1]:
+
 
 import random
 import pygame
@@ -12,6 +14,7 @@ import time
 pygame.init()
 
 
+# In[2]:
 
 
 #https://colorcodes.io/
@@ -23,19 +26,31 @@ gray = (121,125,127)
 red = (205,0,26)
 
 
+# In[3]:
+
 
 font = pygame.font.SysFont("Helvetica neue", 35)
 font.set_bold(True)
 small_font = pygame.font.SysFont("Helvetica neue", 25)
 
 
+# In[4]:
+
 
 manual_statement = small_font.render("Press 'M' for Manual Wordle", True, black)
 automatic_statement = small_font.render("Press 'A' for AI Wordle", True, black)
 
+normal_statement = small_font.render("Press 'N' for Normal Mode", True, black)
+hard_statement = small_font.render("Press 'H' for Hard Mode", True, black)
+
+
 win_statement = font.render("Congrats, You Win!", True, green)
 lose_statement = font.render("You Lost :(", True, red)
 replay_statement = small_font.render("Press RETURN to Play Again!", True, green)
+
+
+# In[5]:
+
 
 class GameDifficulty(enum.Enum):
     normal = 0
@@ -44,6 +59,10 @@ class GameDifficulty(enum.Enum):
 class PlayerMode(enum.Enum):
     manual = 0
     automatic = 1
+
+
+# In[6]:
+
 
 class Wordle:
     def __init__(self, difficulty, player_mode, wordle_solutions):
@@ -98,17 +117,11 @@ class Wordle:
         return self.try_count / self.game_count
 
 
+# In[7]:
+
+
 def run(width, height, main_fps, main_clock, main_window, wordle_game):
     wordle_game.game_count += 1
-
-
-#     SCREEN_WIDTH = 500    
-#     SCREEN_HEIGHT = 600
-
-#     FPS=30
-#     clock = pygame.time.Clock()
-    
-#     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     
     SCREEN_WIDTH = width
     SCREEN_HEIGHT = height
@@ -119,8 +132,6 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
     window.fill(white)
     
     manual_guess = ""
-#     print("initializing guess with zero length")
-#     print(len(manual_guess))
     
     print(wordle_game.solution)
     
@@ -226,84 +237,9 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
             
         pygame.display.update()
         clock.tick(FPS)
-                    
 
 
-
-# #currently untested
-# def automatic(guess):
-#     file = open("wordle_solutions.txt","r")
-#     wordle_solutions = file.readlines()
-#     actual_word = wordle_solutions[random.randint(0, len(wordle_solutions)-1)].upper()
-    
-#     SCREEN_WIDTH = 500    
-#     SCREEN_HEIGHT = 600
-
-#     FPS=30
-#     clock = pygame.time.Clock()
-    
-#     window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-#     window.fill(white)
-    
-#     ai_guess = guess
-    
-#     word_length = 5
-#     num_guesses = 6
-#     for x in range(word_length):
-#         for y in range(num_guesses):
-#             sqr_graphic = pygame.Rect(60 + 80*x, 50 + (80*y), 50, 50)
-#             pygame.draw.rect(window, gray, sqr_graphic, 2) #mode 2: unfilled rectangles
-            
-#     pygame.display.set_caption("AI WORDLE")
-    
-#     turns = 0
-#     win = False
-    
-#     while True:
-        
-#         for event in pygame.event.get():
-#             if event.type == QUIT:
-#                 pygame.quit()
-#                 sys.exit()
-            
-#         if win == True:
-#             automatic(guess)
-            
-#         if turns > 5:
-#             automatic(guess)
-            
-#         if len(ai_guess) > 4:
-#             win = checkGuess(turns, actual_word, ai_guess, window)
-#             turns += 1
-#             ai_guess = ""
-#             #black out bottom of screen where guess was previously
-#             window.fill(white, (0, 500, 500, 200))
-            
-#         window.fill(white, (0, 500, 500, 200))
-#         guess_graphic = font.render(ai_guess, True, black)
-#         window.blit(guess_graphic, (180, 530))
-        
-#         if win == True:
-#             #black out entire screen
-#             window.fill(white)
-            
-#             win_pos = win_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-50))  
-#             replay_pos = replay_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50)) 
-            
-#             window.blit(win_statement, win_pos)
-#             window.blit(replay_statement, replay_pos)
-#         elif turns > 5 and win != True:
-# #             print("you lost")
-#             window.fill(white)
-#             lose_pos = lose_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-50))            
-#             replay_pos = replay_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50)) 
-#             window.blit(lose_statement, lose_pos)
-#             window.blit(replay_statement, replay_pos)
-# #             window.blit(replay_statement, (60, 300))
-            
-#         pygame.display.update()
-#         clock.tick(FPS)
-
+# In[8]:
 
 
 def main():
@@ -326,10 +262,7 @@ def main():
     file1 = open("wordle_solutions.txt","r")
     wordle_solutions = file1.readlines()
     
-
-    file2 = open("common.txt","r")
-    guesses = file2.readlines()
-    guess = guesses[random.randint(0, len(wordle_solutions)-1)].upper()
+    manual_bool = None
 
     while True:
         for event in pygame.event.get():
@@ -339,22 +272,51 @@ def main():
                 
         #user has typed in a letter/pressed key
             if event.type == KEYDOWN:
-                if event.key == pygame.K_a:
-                #not implemented yet? where does the guess come from? does main need a parameter?
-                    print("testing automatic")
-                    wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, wordle_solutions)
+                #have not yet set automatic or manual mode
+                if manual_bool is None:
+                    if event.key == pygame.K_a:
+                        print("testing automatic")
+                        manual_bool = False
+                        window.fill(white)
+                        normal_pos = normal_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-50))  
+                        hard_pos = hard_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50))
+                        window.blit(normal_statement, normal_pos)
+                        window.blit(hard_statement, hard_pos)
+
+                    if event.key == pygame.K_m:
+                        print("testing manual")
+                        manual_bool = True
+                        window.fill(white)
+                        normal_pos = normal_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-50))  
+                        hard_pos = hard_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50))
+                        window.blit(normal_statement, normal_pos)
+                        window.blit(hard_statement, hard_pos)
+                #have set automatic/manual and now need to set normal/hard
+                if manual_bool is not None:
+                    if event.key == pygame.K_n and manual_bool == True:
+                        print("in manual normal mode")
+                        wordle_game = Wordle(GameDifficulty.normal, PlayerMode.manual, wordle_solutions)
+                        run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
+                    if event.key == pygame.K_n and manual_bool == False:
+                        print("in automatic normal mode")
+                        wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, wordle_solutions)
+                        run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
+                    if event.key == pygame.K_h and manual_bool == True:
+                        print("in manual hard mode")
+                        wordle_game = Wordle(GameDifficulty.hard, PlayerMode.manual, wordle_solutions)
+                        run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
+                    if event.key == pygame.K_h and manual_bool == False:
+                        print("in automatic hard mode")
+                        wordle_game = Wordle(GameDifficulty.hard, PlayerMode.automatic, wordle_solutions)
+                        run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
+
+
         
-                    run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
-            
-                
-                if event.key == pygame.K_m:
-                    print("testing manual")
-                    wordle_game = Wordle(GameDifficulty.normal, PlayerMode.manual, wordle_solutions)
-                    run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
-                
         pygame.display.update()
         clock.tick(FPS)
-        
+
+
+# In[9]:
 
 
 main()
