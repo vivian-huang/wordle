@@ -65,13 +65,14 @@ class PlayerMode(enum.Enum):
 
 
 class Wordle:
-    def __init__(self, difficulty, player_mode, wordle_solutions):
+    def __init__(self, difficulty, player_mode, wordle_solutions, possible_guesses):
         self.difficulty = difficulty
         self.player_mode = player_mode
         self.try_count = 0
         self.game_count = 0
         self.solution_set = wordle_solutions
         self.solution = wordle_solutions[random.randint(0, len(wordle_solutions)-1)].upper()
+        self.possible_guesses = possible_guesses
 
     def generate_new_solution(self):
         self.solution = self.solution_set[random.randint(0, len(self.solution_set)-1)].upper()
@@ -180,8 +181,10 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
                     if event.key == K_BACKSPACE:
                         #removing last one
                         manual_guess = manual_guess[:-1]
-                        
-                    if event.key == K_RETURN and len(manual_guess) > 4:
+                    print("manual_guess: ")
+                    print(manual_guess)
+                    print(manual_guess in wordle_game.possible_guesses)
+                    if event.key == K_RETURN and len(manual_guess) > 4 and manual_guess.lower() in wordle_game.possible_guesses:
                         win = wordle_game.check_guess(turns, wordle_game.solution, manual_guess, window)
                         turns += 1
                         
@@ -265,6 +268,12 @@ def main():
     file1 = open("wordle_solutions.txt","r")
     wordle_solutions = file1.readlines()
     
+    file2 = open("common.txt","r")
+    possible_guesses = file2.read().splitlines()
+#     print("possible_guesses type:")
+#     print(type(possible_guesses))
+#     print(possible_guesses)
+    
     manual_bool = None
 
     while True:
@@ -294,23 +303,24 @@ def main():
                         hard_pos = hard_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50))
                         window.blit(normal_statement, normal_pos)
                         window.blit(hard_statement, hard_pos)
+                        
                 #have set automatic/manual and now need to set normal/hard
                 if manual_bool is not None:
                     if event.key == pygame.K_n and manual_bool == True:
                         print("in manual normal mode")
-                        wordle_game = Wordle(GameDifficulty.normal, PlayerMode.manual, wordle_solutions)
+                        wordle_game = Wordle(GameDifficulty.normal, PlayerMode.manual, wordle_solutions, possible_guesses)
                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
                     if event.key == pygame.K_n and manual_bool == False:
                         print("in automatic normal mode")
-                        wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, wordle_solutions)
+                        wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, wordle_solutions, possible_guesses)
                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
                     if event.key == pygame.K_h and manual_bool == True:
                         print("in manual hard mode")
-                        wordle_game = Wordle(GameDifficulty.hard, PlayerMode.manual, wordle_solutions)
+                        wordle_game = Wordle(GameDifficulty.hard, PlayerMode.manual, wordle_solutions, possible_guesses)
                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
                     if event.key == pygame.K_h and manual_bool == False:
                         print("in automatic hard mode")
-                        wordle_game = Wordle(GameDifficulty.hard, PlayerMode.automatic, wordle_solutions)
+                        wordle_game = Wordle(GameDifficulty.hard, PlayerMode.automatic, wordle_solutions, possible_guesses)
                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
 
 
