@@ -191,8 +191,10 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
                         window.fill(white, (0, 500, 500, 200))
 
             elif wordle_game.player_mode == PlayerMode.automatic:
-                time.sleep(1)
+#                 time.sleep(1)
                 print("we are in automatic")
+                print("turns" + str(turns))
+                ai_guess = "CRANE"
                 if win == True:
                     wordle_game.generate_new_solution()
                     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
@@ -201,14 +203,15 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
                     wordle_game.generate_new_solution()
                     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
 
-                ai_guess = "CRANE"
-                if len(ai_guess) > 4:
-                    win = wordle_game.check_guess(turns, wordle_game.solution, ai_guess, window)
-                    turns += 1
-                    ai_guess = ""
+                
+#                 if len(ai_guess) > 4:
+                win = wordle_game.check_guess(turns, wordle_game.solution, ai_guess, window)
+                turns += 1
+                ai_guess = ""
                     #black out bottom of screen where guess was previously
-                    window.fill(white, (0, 500, 500, 200))
-            
+#                     window.fill(white, (0, 500, 500, 200))
+        
+        #showing guess at bottom for manual vers
         window.fill(white, (0, 500, 500, 200))
         guess_graphic = font.render(manual_guess, True, black)
         window.blit(guess_graphic, (180, 530))
