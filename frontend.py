@@ -10,6 +10,7 @@ from pygame.locals import *
 import sys
 import enum
 import time
+import expected_value_model
 
 pygame.init()
 
@@ -71,11 +72,14 @@ class Wordle:
         self.try_count = 0
         self.game_count = 0
         self.solution_set = wordle_solutions
-        self.solution = wordle_solutions[random.randint(0, len(wordle_solutions)-1)].upper()
+        # self.solution = wordle_solutions[random.randint(0, len(wordle_solutions)-1)].upper()
+        self.solution = "CACTI"
         self.possible_guesses = possible_guesses
+        self.guessing_model = expected_value_model.ExpectedValueModel(possible_guesses, self.solution.lower())
 
     def generate_new_solution(self):
         self.solution = self.solution_set[random.randint(0, len(self.solution_set)-1)].upper()
+        self.guessing_model.answer = self.solution.lower()
         
     def check_guess(self, turns, answer, guess, window):
         self.try_count += 1
@@ -88,6 +92,7 @@ class Wordle:
         word_length = 5
         
         for i, letter in enumerate(guess):
+            print(i, letter, guess)
             if letter == answer[i]:
                 word_color[i] = green
             elif letter in answer:
@@ -169,6 +174,7 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
                     #won game
                     if event.key == K_RETURN and win == True:
                         wordle_game.generate_new_solution()
+
                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
                     
                     #ran out of turns
@@ -200,20 +206,25 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
 #                 time.sleep(1)
                 print("we are in automatic")
                 print("turns" + str(turns))
-                ai_guess = "CRANE"
+                print(wordle_game.guessing_model.possible_guesses)
+
+                ai_guess = wordle_game.guessing_model.next_guess().upper()
+                print("HERE: ", ai_guess)
                 if win == True:
                     wordle_game.generate_new_solution()
+                    wordle_game.guessing_model.possible_guesses = wordle_game.possible_guesses
                     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
         
                 if turns > 5:
                     wordle_game.generate_new_solution()
+
+                    wordle_game.guessing_model.possible_guesses = wordle_game.possible_guesses
                     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
 
                 
 #                 if len(ai_guess) > 4:
                 win = wordle_game.check_guess(turns, wordle_game.solution, ai_guess, window)
                 turns += 1
-                ai_guess = ""
                     #black out bottom of screen where guess was previously
 #                     window.fill(white, (0, 500, 500, 200))
         
@@ -300,6 +311,7 @@ def main():
 #                     window.blit(normal_statement, normal_pos)
 #                     window.blit(hard_statement, hard_pos)
                     wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, wordle_solutions, possible_guesses)
+
                     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
 
                 if event.key == pygame.K_m:
