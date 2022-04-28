@@ -8,6 +8,7 @@ class MatrixModel:
         self.gray_letters = []
         self.possible_guesses = possible_words
         self.freq_scoring = {'q': 26, 'j': 25, 'z': 24, 'x': 23, 'v': 22, 'w': 21, 'f': 20, 'k': 19, 'b': 18, 'g': 17, 'm': 16, 'h': 15, 'y': 14, 'p': 13, 'u': 12, 'c': 11, 'n': 10, 'd': 9, 'l': 8, 'i': 7, 't': 6, 'o': 5, 'r': 4, 'a': 3, 's': 2, 'e': 1}
+        self.first_guess = True
 
         
     # This function determines if a guess is valid given the feedback that's been given from guesses 
@@ -68,7 +69,9 @@ class MatrixModel:
     # a current working list of possible guesses, a list of gray letters, and the current guess we have just made
     # It then finds the next guess using a greedy min-max approach 
     def next_guess(self):
-        
+        if self.first_guess:
+            return self.current_guess
+            self.first_guess = False
         # Getting feedback on our current guess based on the answer we're working towards 
         guess_feedback = self._score_guess(self.answer, self.current_guess)
         green_letters, yellow_letters, current_gray_letters = self._get_green_yellow_gray_letters(guess_feedback)
