@@ -45,11 +45,15 @@ class MatrixModel:
             else:
                 guess_feedback.append((guess[i],0))
         return guess_feedback
-    # This function creates a frequency scoring
+    # This function creates a frequency scoring for letter frequency
     def _score_frequency(self, word):
         score = 0
         for letter in word:
             score += self.freq_scoring[letter]
+        return score
+
+    def _word_freq_score(self, word):
+        score = 1/self.word_freqs[word]
         return score
     # This function takes feedback in the above form and converts it into a list of green, yellow, and
     # gray letters green letters and yellow letters are stored in tuples of the letter and their index within
@@ -107,6 +111,7 @@ class MatrixModel:
         # Given this matrix of possible guesses for each guess, answer pair, we find the guess that minimizes the
         # maximum new possible guesses across all possible answers. This is a greedy minmax approach
         max_guess_dict = {}
+        #dictionary: key is the number of possible future guesses, value is guess
         for guess in guess_answer_matrix:
             max_possible_guesses = max(guess_answer_matrix[guess].values())
             max_guess_dict.setdefault(max_possible_guesses,[]).append(guess)
@@ -115,8 +120,15 @@ class MatrixModel:
             min_guess_score = 3000
             min_guess = ''
             for key in max_guess_dict:
+                #use word frequency if one guess possible
+                # if key == 1:
+                #     for guess in max_guess_dict[key]:
+                #         guess_score = self._word_freq_score(guess)
+                #         if guess_score < min_guess_score:
+                #             min_guess = guess
+                # else:
                 for guess in max_guess_dict[key]:
-                    guess_score = self._score_frequency(guess)
+                    guess_score = self._word_freq_score(guess)
                     if guess_score < min_guess_score:
                         min_guess_score = guess_score
                         min_guess = guess

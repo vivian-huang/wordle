@@ -69,7 +69,7 @@ class GuessingModel(enum.Enum):
 
 
 class Wordle:
-    def __init__(self, difficulty, player_mode, guessing_mod, wordle_solutions, possible_guesses, word_freq_tuples):
+    def __init__(self, difficulty, player_mode, guessing_mod, wordle_solutions, possible_guesses, word_freq_dict):
         self.difficulty = difficulty
         self.player_mode = player_mode
         self.try_count = 0
@@ -82,7 +82,7 @@ class Wordle:
         if guessing_mod == GuessingModel.expected_value_mod:
             self.guessing_model = expected_value_model.ExpectedValueModel(possible_guesses, self.solution.lower())
         elif guessing_mod == GuessingModel.matrix_mod:
-            self.guessing_model = matrix_model.MatrixModel(possible_guesses, "crane", self.solution.lower(), word_freq_tuples)
+            self.guessing_model = matrix_model.MatrixModel(possible_guesses, "crane", self.solution.lower(), word_freq_dict)
 
     def generate_new_solution(self):
         self.solution = self.solution_set[random.randint(0, len(self.solution_set)-1)].upper()
@@ -323,10 +323,11 @@ def main():
 
     file3 = open("word_frequency.txt","r")
     word_freqs = file3.read().splitlines()
-    word_freq_tuples = []
+    word_freq_dict = {}
     for x in word_freqs:
         row = x.split('\t')
-        word_freq_tuples.append(tuple(row))
+        word_freq_dict[row[0]] = int(row[1])
+        # word_freq_tuples.append(tuple(row))
 
     model_bool = False
 
@@ -360,7 +361,7 @@ def main():
 #                     hard_pos = hard_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50))
 #                     window.blit(normal_statement, normal_pos)
 #                     window.blit(hard_statement, hard_pos)
-                    wordle_game = Wordle(GameDifficulty.normal, PlayerMode.manual, GuessingModel.expected_value_mod, wordle_solutions, possible_guesses, word_freq_tuples)
+                    wordle_game = Wordle(GameDifficulty.normal, PlayerMode.manual, GuessingModel.expected_value_mod, wordle_solutions, possible_guesses, word_freq_dict)
                     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
 
                 #have set automatic/manual and now need to set normal/hard
@@ -371,7 +372,7 @@ def main():
                     #     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
                     if event.key == pygame.K_1 and model_bool == True:
                         print("in automatic; expected val model")
-                        wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, GuessingModel.expected_value_mod, wordle_solutions, possible_guesses, word_freq_tuples)
+                        wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, GuessingModel.expected_value_mod, wordle_solutions, possible_guesses, word_freq_dict)
                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
                     # if event.key == pygame.K_h and model_bool == False:
                     #     print("in manual mode")
@@ -379,7 +380,7 @@ def main():
                     #     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
                     if event.key == pygame.K_2 and model_bool == True:
                         print("in automatic; matrix model")
-                        wordle_game = Wordle(GameDifficulty.hard, PlayerMode.automatic, GuessingModel.matrix_mod, wordle_solutions, possible_guesses, word_freq_tuples)
+                        wordle_game = Wordle(GameDifficulty.hard, PlayerMode.automatic, GuessingModel.matrix_mod, wordle_solutions, possible_guesses, word_freq_dict)
                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
 
 
