@@ -11,6 +11,7 @@ import sys
 import enum
 import time
 import expected_value_model
+import matrix_model
 
 pygame.init()
 
@@ -75,7 +76,8 @@ class Wordle:
         # self.solution = wordle_solutions[random.randint(0, len(wordle_solutions)-1)].upper()
         self.solution = "CACTI"
         self.possible_guesses = possible_guesses
-        self.guessing_model = expected_value_model.ExpectedValueModel(possible_guesses, self.solution.lower())
+        # self.guessing_model = expected_value_model.ExpectedValueModel(possible_guesses, self.solution.lower())
+        self.guessing_model = matrix_model.MatrixModel(possible_guesses, "crane", self.solution.lower())
 
     def generate_new_solution(self):
         self.solution = self.solution_set[random.randint(0, len(self.solution_set)-1)].upper()
