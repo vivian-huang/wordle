@@ -42,8 +42,8 @@ small_font = pygame.font.SysFont("Helvetica neue", 25)
 manual_statement = small_font.render("Press 'M' for Manual Wordle", True, black)
 automatic_statement = small_font.render("Press 'A' for AI Wordle", True, black)
 
-normal_statement = small_font.render("Press 'N' for Normal Mode", True, black)
-hard_statement = small_font.render("Press 'H' for Hard Mode", True, black)
+expected_statement = small_font.render("Press '1' for Expected Value Model", True, black)
+matrix_statement = small_font.render("Press '2' for Matrix Model", True, black)
 
 
 win_statement = font.render("Congrats, You Win!", True, green)
@@ -62,12 +62,14 @@ class PlayerMode(enum.Enum):
     manual = 0
     automatic = 1
 
-
+class GuessingModel(enum.Enum):
+    expected_value_mod = 0
+    matrix_mod = 1
 # In[6]:
 
 
 class Wordle:
-    def __init__(self, difficulty, player_mode, wordle_solutions, possible_guesses):
+    def __init__(self, difficulty, player_mode, guessing_mod, wordle_solutions, possible_guesses):
         self.difficulty = difficulty
         self.player_mode = player_mode
         self.try_count = 0
@@ -76,8 +78,11 @@ class Wordle:
         # self.solution = wordle_solutions[random.randint(0, len(wordle_solutions)-1)].upper()
         self.solution = "CACTI"
         self.possible_guesses = possible_guesses
-        # self.guessing_model = expected_value_model.ExpectedValueModel(possible_guesses, self.solution.lower())
-        self.guessing_model = matrix_model.MatrixModel(possible_guesses, "crane", self.solution.lower())
+
+        if guessing_mod == GuessingModel.expected_value_mod:
+            self.guessing_model = expected_value_model.ExpectedValueModel(possible_guesses, self.solution.lower())
+        elif guessing_mod == GuessingModel.matrix_mod:
+            self.guessing_model = matrix_model.MatrixModel(possible_guesses, "crane", self.solution.lower())
 
     def generate_new_solution(self):
         self.solution = self.solution_set[random.randint(0, len(self.solution_set)-1)].upper()
@@ -197,8 +202,6 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
                     #only allowing alphabet options
                     if event.key == pygame.K_a or event.key == pygame.K_b or event.key == pygame.K_c or event.key == pygame.K_d or event.key == pygame.K_e or event.key == pygame.K_f or event.key == pygame.K_g or event.key == pygame.K_h or event.key == pygame.K_i or event.key == pygame.K_j or event.key == pygame.K_k or event.key == pygame.K_l or event.key == pygame.K_m or event.key == pygame.K_n or event.key == pygame.K_o or event.key == pygame.K_p or event.key == pygame.K_q or event.key == pygame.K_r or event.key == pygame.K_s or event.key == pygame.K_t or event.key == pygame.K_u or event.key == pygame.K_v or event.key == pygame.K_w or event.key == pygame.K_x or event.key == pygame.K_y or event.key == pygame.K_z:
                         manual_guess += event.unicode.upper()
-    #                 print("adding character")
-    #                 print(len(guess))
 
                     #won game
                     if event.key == K_RETURN and win == True:
@@ -233,12 +236,9 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
                         window.fill(white, (0, 500, 500, 200))
 
             elif wordle_game.player_mode == PlayerMode.automatic:
-#                 time.sleep(1)
                 print("we are in automatic")
                 print("turns" + str(turns))
                 print(wordle_game.guessing_model.possible_guesses)
-
-                # ai_guess = wordle_game.guessing_model.next_guess().upper()
                 print("HERE: ", ai_guess)
 
                 if event.type == KEYDOWN:
@@ -272,9 +272,6 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
             guess_graphic = font.render(ai_guess, True, black)
             window.blit(guess_graphic, (180, 530))
 
-        #end game text
-#         print("turns: " + str(turns))
-#         print(win)
         if win == True:
             #black out entire screen
             window.fill(white)
@@ -284,7 +281,6 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
 
             window.blit(win_statement, win_pos)
             window.blit(replay_statement, replay_pos)
-#             window.blit(replay_statement, (60, 300))
         elif turns > 5 and win != True:
 #             print("you lost")
             window.fill(white)
@@ -292,9 +288,7 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
             replay_pos = replay_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50))
             window.blit(lose_statement, lose_pos)
             window.blit(replay_statement, replay_pos)
-#             window.blit(replay_statement, (60, 300))
 
-        #moved run outside
         pygame.display.update()
         clock.tick(FPS)
 
@@ -326,11 +320,8 @@ def main():
 
     file2 = open("common.txt","r")
     possible_guesses = file2.read().splitlines()
-#     print("possible_guesses type:")
-#     print(type(possible_guesses))
-#     print(possible_guesses)
 
-#     manual_bool = None
+    model_bool = False
 
     while True:
         for event in pygame.event.get():
@@ -344,45 +335,45 @@ def main():
 #                 if manual_bool is None:
                 if event.key == pygame.K_a:
                     print("testing automatic")
-                    manual_bool = False
+                    model_bool = True
                     window.fill(white)
-#                     normal_pos = normal_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-50))
-#                     hard_pos = hard_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50))
-#                     window.blit(normal_statement, normal_pos)
-#                     window.blit(hard_statement, hard_pos)
-                    wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, wordle_solutions, possible_guesses)
+                    expected_pos = expected_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-50))
+                    matrix_pos = matrix_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50))
+                    window.blit(expected_statement, expected_pos)
+                    window.blit(matrix_statement, matrix_pos)
+                    # wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, GuessingModel.expected_value_mod, wordle_solutions, possible_guesses)
+                    #
+                    # run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
 
-                    run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
-
-                if event.key == pygame.K_m:
+                if event.key == pygame.K_m and model_bool == False:
                     print("testing manual")
-                    manual_bool = True
+                    model_bool = False
                     window.fill(white)
 #                     normal_pos = normal_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2-50))
 #                     hard_pos = hard_statement.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2+50))
 #                     window.blit(normal_statement, normal_pos)
 #                     window.blit(hard_statement, hard_pos)
-                    wordle_game = Wordle(GameDifficulty.normal, PlayerMode.manual, wordle_solutions, possible_guesses)
+                    wordle_game = Wordle(GameDifficulty.normal, PlayerMode.manual, GuessingModel.expected_value_mod, wordle_solutions, possible_guesses)
                     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
 
                 #have set automatic/manual and now need to set normal/hard
-#                 if manual_bool is not None:
-#                     if event.key == pygame.K_n and manual_bool == True:
-#                         print("in manual normal mode")
-#                         wordle_game = Wordle(GameDifficulty.normal, PlayerMode.manual, wordle_solutions, possible_guesses)
-#                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
-#                     if event.key == pygame.K_n and manual_bool == False:
-#                         print("in automatic normal mode")
-#                         wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, wordle_solutions, possible_guesses)
-#                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
-#                     if event.key == pygame.K_h and manual_bool == True:
-#                         print("in manual hard mode")
-#                         wordle_game = Wordle(GameDifficulty.hard, PlayerMode.manual, wordle_solutions, possible_guesses)
-#                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
-#                     if event.key == pygame.K_h and manual_bool == False:
-#                         print("in automatic hard mode")
-#                         wordle_game = Wordle(GameDifficulty.hard, PlayerMode.automatic, wordle_solutions, possible_guesses)
-#                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
+                if model_bool is True:
+                    # if event.key == pygame.K_1 and model_bool == False:
+                    #     print("in manual mode")
+                    #     wordle_game = Wordle(GameDifficulty.normal, PlayerMode.manual, GuessingModel.expected_value_mod, wordle_solutions, possible_guesses)
+                    #     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
+                    if event.key == pygame.K_1 and model_bool == True:
+                        print("in automatic; expected val model")
+                        wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, GuessingModel.expected_value_mod, wordle_solutions, possible_guesses)
+                        run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
+                    # if event.key == pygame.K_h and model_bool == False:
+                    #     print("in manual mode")
+                    #     wordle_game = Wordle(GameDifficulty.hard, PlayerMode.manual, GuessingModel.expected_value_mod, wordle_solutions, possible_guesses)
+                    #     run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
+                    if event.key == pygame.K_2 and model_bool == True:
+                        print("in automatic; matrix model")
+                        wordle_game = Wordle(GameDifficulty.hard, PlayerMode.automatic, GuessingModel.matrix_mod, wordle_solutions, possible_guesses)
+                        run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
 
 
 
