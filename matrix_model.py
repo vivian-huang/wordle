@@ -70,8 +70,8 @@ class MatrixModel:
     # It then finds the next guess using a greedy min-max approach 
     def next_guess(self):
         if self.first_guess:
-            return self.current_guess
             self.first_guess = False
+            return self.current_guess
         # Getting feedback on our current guess based on the answer we're working towards 
         guess_feedback = self._score_guess(self.answer, self.current_guess)
         green_letters, yellow_letters, current_gray_letters = self._get_green_yellow_gray_letters(guess_feedback)
