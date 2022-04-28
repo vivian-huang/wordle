@@ -5,6 +5,8 @@
 
 
 import random
+
+from numpy import isin
 import pygame
 from pygame.locals import *
 import sys
@@ -87,6 +89,9 @@ class Wordle:
     def generate_new_solution(self):
         self.solution = self.solution_set[random.randint(0, len(self.solution_set)-1)].upper()
         self.guessing_model.answer = self.solution.lower()
+        if isinstance(self.guessing_model, matrix_model.MatrixModel):
+            self.guessing_model.first_guess = True
+            self.guessing_model.current_guess = "crane"
 
     def draw_word(self, guess, word_space, spacing, word_color, word_length, turns, window):
 
