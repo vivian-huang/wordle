@@ -168,10 +168,6 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
 
     window.fill(white)
 
-    manual_guess = ""
-    if wordle_game.player_mode == PlayerMode.automatic:
-        ai_guess = wordle_game.guessing_model.next_guess().upper()
-
 
     print(wordle_game.solution)
 
@@ -184,11 +180,20 @@ def run(width, height, main_fps, main_clock, main_window, wordle_game):
 
     if wordle_game.player_mode == PlayerMode.manual:
         pygame.display.set_caption("MANUAL MODE")
-    elif wordle_game.player_mode == PlayerMode.automatic:
-        pygame.display.set_caption("AI MODE")
+    # elif wordle_game.player_mode == PlayerMode.automatic:
+    #     print(wordle_game.guessing_model)
+    #     if wordle_game.guessing_model == GuessingModel.expected_value_mod:
+    #         pygame.display.set_caption("AI Expected Value Model")
+    #     elif wordle_game.guessing_model == GuessingModel.matrix_mod:
+    #         print("here in matrix")
+    #         pygame.display.set_caption("AI Matrix Model")
 
     turns = 0
     win = False
+
+    manual_guess = ""
+    if wordle_game.player_mode == PlayerMode.automatic:
+        ai_guess = wordle_game.guessing_model.next_guess().upper()
 
     while True:
         for event in pygame.event.get():
@@ -373,6 +378,7 @@ def main():
                     if event.key == pygame.K_1 and model_bool == True:
                         print("in automatic; expected val model")
                         wordle_game = Wordle(GameDifficulty.normal, PlayerMode.automatic, GuessingModel.expected_value_mod, wordle_solutions, possible_guesses, word_freq_dict)
+                        pygame.display.set_caption("AI EXPECTED VALUE MODEL")
                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
                     # if event.key == pygame.K_h and model_bool == False:
                     #     print("in manual mode")
@@ -381,6 +387,7 @@ def main():
                     if event.key == pygame.K_2 and model_bool == True:
                         print("in automatic; matrix model")
                         wordle_game = Wordle(GameDifficulty.hard, PlayerMode.automatic, GuessingModel.matrix_mod, wordle_solutions, possible_guesses, word_freq_dict)
+                        pygame.display.set_caption("AI MATRIX MODEL")
                         run(SCREEN_WIDTH, SCREEN_HEIGHT, FPS, clock, window, wordle_game)
 
 
