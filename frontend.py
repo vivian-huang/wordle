@@ -80,7 +80,7 @@ class Wordle:
         self.possible_guesses = possible_guesses
 
         if guessing_mod == GuessingModel.expected_value_mod:
-            self.guessing_model = expected_value_model.ExpectedValueModel(possible_guesses, self.solution.lower())
+            self.guessing_model = expected_value_model.ExpectedValueModel(possible_guesses, self.solution.lower(), False, 'colin', False)
         elif guessing_mod == GuessingModel.matrix_mod:
             self.guessing_model = matrix_model.MatrixModel(possible_guesses, "crane", self.solution.lower(), word_freq_dict)
 
