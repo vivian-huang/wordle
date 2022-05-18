@@ -2,6 +2,7 @@ import math
 import random
 import numpy as np
 from heapq import heappop, heappush, heapify, nlargest
+import time
 
 class ExpectedValueModel:
     # WordleGame in frontend.py will read the .txt file and pass in the possible_guesses list.
@@ -138,14 +139,21 @@ class ExpectedValueModel:
         current_guess_list = []
         guess_count_for_current_game = 0
         all_counts = []
+        all_times = []
+        start = time.time()
+
         while i < number_of_games:
             w = model.next_guess()
             guess_count_for_current_game += 1
 
             current_guess_list.append(w)
             if w == model.answer:
-                # print(i, self.answer, current_guess_list)
+                print(i, self.answer, current_guess_list)
                 i += 1
+                end = time.time()
+                all_times.append(end - start)
+                if i < number_of_games:
+                    start = time.time()
                 all_counts.append(guess_count_for_current_game)
                 guess_count_for_current_game = 0
 
@@ -158,7 +166,8 @@ class ExpectedValueModel:
         
         print("Burn opt:", self.burn_opt, "Using burner word:", self.burn_word, \
             "Rhyme opt:", self.rhyme_opt, ",Avg. guesses per game:", sum(all_counts)/ len(all_counts),\
-            "Variance:", np.var(all_counts))
+            "Std. dev:", math.sqrt(np.var(all_counts)), ", Avg. seconds per game:",
+            sum(all_times)/len(all_counts), "Std. dev:", math.sqrt(np.var(all_times)))
 
             
 
@@ -201,23 +210,11 @@ solutions = my_file.read()
 solution_list = solutions.split("\n")
 my_file.close()
 
-model = ExpectedValueModel(guess_list, solution_list, False, "colin", False)
-model.run_all_possible_games()
-
-model = ExpectedValueModel(guess_list, solution_list, True, "colin", False)
-model.run_all_possible_games()
-
-
-model = ExpectedValueModel(guess_list, solution_list, False, "colin", True)
-model.run_all_possible_games()
-
-
 model = ExpectedValueModel(guess_list, solution_list, True, "colin", True)
-model.run_all_possible_games()
-
+# model.find_burner_word()
 
 # model = ExpectedValueModel(guess_list, solution_list, True, "solid", False)
-# model.run_all_possible_games()
+model.run_all_possible_games()
 
 # model = ExpectedValueModel(guess_list, solution_list, True, "slide", False)
 # model.run_all_possible_games()
