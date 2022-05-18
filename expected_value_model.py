@@ -2,7 +2,6 @@ import math
 import random
 import numpy as np
 from heapq import heappop, heappush, heapify, nlargest
-import time
 
 class ExpectedValueModel:
     # WordleGame in frontend.py will read the .txt file and pass in the possible_guesses list.
@@ -19,12 +18,15 @@ class ExpectedValueModel:
         self.burn_word = burn_word
         self.rhyme_opt = rhyme_optimization
         self.rhyme_thrown = False
-        
+
 
     def get_word_feedback(self, word, target):
+        # print(len(target))
         feedback = []
         seen_count = {}
         for i in range(5):
+            # print("word:" + word)
+            # print("target:" + target)
             if word[i] == target[i]:
                 feedback.append("green")
                 seen_count[word[i]] = seen_count.get(word[i], 0) + 1
@@ -35,7 +37,7 @@ class ExpectedValueModel:
                 feedback.append("gray")
         return tuple(feedback)
 
-    
+
     def get_word_score(self, word):
 
         pattern_count = {}
@@ -58,13 +60,13 @@ class ExpectedValueModel:
 
         if self.turn_count == 0:
             best_word = "rates"
-        
+
         elif (self.burn_opt and self.turn_count > 1) or not self.burn_opt:
             for new_word in self.possible_guesses:
                 new_score = self.get_word_score(new_word)
                 if self.rhyme_opt:
                     scwords.append((new_score, new_word))
-            
+
                 if not self.rhyme_opt and new_score > best_word_score:
                     best_word = new_word
                     best_word_score = new_score
@@ -87,10 +89,10 @@ class ExpectedValueModel:
                 else:
                     best_word = best_words[0][1]
 
-        if self.burn_opt: 
+        if self.burn_opt:
             if self.turn_count == 0:
                 best_word = "rates"
-            
+
             elif self.turn_count == 1:
                 best_word = self.burn_word
 
@@ -103,9 +105,9 @@ class ExpectedValueModel:
 
         self.possible_guesses = new_possible_guesses
         self.turn_count += 1
-        
+
         return best_word
-    
+
     def run_random_games(self):
         number_of_games = 1000
         i = 0
@@ -139,21 +141,14 @@ class ExpectedValueModel:
         current_guess_list = []
         guess_count_for_current_game = 0
         all_counts = []
-        all_times = []
-        start = time.time()
-
         while i < number_of_games:
             w = model.next_guess()
             guess_count_for_current_game += 1
 
             current_guess_list.append(w)
             if w == model.answer:
-                print(i, self.answer, current_guess_list)
+                # print(i, self.answer, current_guess_list)
                 i += 1
-                end = time.time()
-                all_times.append(end - start)
-                if i < number_of_games:
-                    start = time.time()
                 all_counts.append(guess_count_for_current_game)
                 guess_count_for_current_game = 0
 
@@ -163,13 +158,18 @@ class ExpectedValueModel:
                 self.answer = self.possible_answers[i]
                 current_guess_list = []
                 self.turn_count = 0
-        
+
+        filename = '/Users/vivian/Desktop/burner_and_rhyme_opt.txt'
+
+        with open(filename, mode="w") as outfile:
+            for s in all_counts:
+                outfile.write("%s\n" % s)
+
         print("Burn opt:", self.burn_opt, "Using burner word:", self.burn_word, \
             "Rhyme opt:", self.rhyme_opt, ",Avg. guesses per game:", sum(all_counts)/ len(all_counts),\
-            "Std. dev:", math.sqrt(np.var(all_counts)), ", Avg. seconds per game:",
-            sum(all_times)/len(all_counts), "Std. dev:", math.sqrt(np.var(all_times)))
+            "Variance:", np.var(all_counts))
 
-            
+
 
     def find_burner_word(self):
         #Finding burner words to use
@@ -180,7 +180,7 @@ class ExpectedValueModel:
             words_to_score[new_word] = self.get_word_score(new_word)
         print("DADADAADA")
         scores = sorted(words_to_score, key=words_to_score.get, reverse=True)
-        
+
         # Define a "similarity score" as a metric by which the difference between words can
         # be gauged. Higher similarity score means words are more similar
         # 1 point for each similar character in the exact same spot
@@ -210,11 +210,23 @@ solutions = my_file.read()
 solution_list = solutions.split("\n")
 my_file.close()
 
+# model = ExpectedValueModel(guess_list, solution_list, False, "colin", False)
+# model.run_all_possible_games()
+
+# model = ExpectedValueModel(guess_list, solution_list, True, "colin", False)
+# model.run_all_possible_games()
+#
+#
+# model = ExpectedValueModel(guess_list, solution_list, False, "colin", True)
+# model.run_all_possible_games()
+#
+#
 model = ExpectedValueModel(guess_list, solution_list, True, "colin", True)
-# model.find_burner_word()
+model.run_all_possible_games()
+
 
 # model = ExpectedValueModel(guess_list, solution_list, True, "solid", False)
-model.run_all_possible_games()
+# model.run_all_possible_games()
 
 # model = ExpectedValueModel(guess_list, solution_list, True, "slide", False)
 # model.run_all_possible_games()
